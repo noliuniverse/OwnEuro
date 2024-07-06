@@ -1828,7 +1828,7 @@ document.getElementById('resetButton').addEventListener('click', () => {
         checkbox.checked = false;
         const aqCheckbox = checkbox.nextElementSibling.nextElementSibling;
         aqCheckbox.checked = false;
-        aqCheckbox.disabled = true;
+        aqCheckbox.disabled = false;
     });
     document.querySelectorAll('.odds-input').forEach(input => {
         input.value = 100;
