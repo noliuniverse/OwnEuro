@@ -1388,6 +1388,8 @@ function createSemiFinalTable(semiFinal) {
                     ${selectedVotingSystem === 'current' ? '<th>Jury Points</th>' : ''}
                     <th>Tele Points</th>
                     ${selectedVotingSystem === 'current' ? '<th>Total Points</th>' : ''}
+                    ${selectedVotingSystem === 'current' ? '<th>Jury Odds</th>' : ''}
+                    <th>Tele Odds</th>
                     ${selectedVotingSystem === 'current' ? '<th>Jury Placement</th>' : ''}
                     ${selectedVotingSystem === 'current' ? '<th>Tele Placement</th>' : ''}
                 </tr>
@@ -1409,6 +1411,8 @@ function createSemiFinalTable(semiFinal) {
                 ${selectedVotingSystem === 'current' ? `<td class="points">${result.juryTotal}</td>` : ''}
                 <td class="points">${result.teleTotal}</td>
                 ${selectedVotingSystem === 'current' ? `<td class="points">${result.juryTotal + result.teleTotal}</td>` : ''}
+                ${selectedVotingSystem === 'current' ? `<td class="points">${result.juryTotal + result.teleOdds}</td>` : ''}
+                <td class="points">${result.teleOdds}</td>
                 ${selectedVotingSystem === 'current' ? `<td class="semi-placement">${result.juryPlacement}</td>` : ''}
                 ${selectedVotingSystem === 'current' ? `<td class="semi-placement">${result.telePlacement}</td>` : ''}
             </tr>
