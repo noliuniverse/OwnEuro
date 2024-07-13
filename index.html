@@ -336,6 +336,9 @@
             min-height: 20px;
             display: revert;
         }
+	.odds-column {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -360,14 +363,14 @@
             </div>
         </div>
     </div>
-    
+ 
     <div id="dynamicVotingArea" class="mb-4"></div>
-    
+ 
     <div class="row">
         <div class="col-md-12">
             <div class="card settings-card">
                 <div class="card-body">
-                    <h5> V.1.0.1 </h5>
+                    <h5> V.1.1.0 </h5>
                     <h2>Select Participating Countries and Set Odds <br> (11-50 countries semi-finals starting with 27, odds -> lower is better):</h2>
                     <div class="row">
                         <div class="col-md-8">
@@ -402,7 +405,7 @@
                                     <div class="selection-table w-100">
                                         <input placeholder="Name" id="custom_name"/>
                                         <input placeholder="Code (E.g: Swiss is ch)" id="custom_code"/>
-                                        <input placeholder="Flag (E.g: LINKHERE.png)" id="custom_flag"/>
+                                        <input placeholder="Flag (E.g: Direct link.png)" id="custom_flag"/>
                                         <button  class="btn btn-success w-100 mt-4" id="add_contestant">Add +</button>
                                     </div>
                                 </div>
@@ -418,21 +421,59 @@
                             </div>
                         </div>
                     </div>
-                    <button id="randomizeButton" class="btn btn-success w-100 mt-4">Randomize Odds</button>
-                    <button id="defaultOddsButton" class="btn btn-info w-100 mt-2">Default Odds (100)</button>
-                    <button id="randomizeGenresButton" class="btn btn-secondary w-100 mt-2">Randomize Genres</button>
-                    <button id="randomizeGenreLikeabilityButton" class="btn btn-secondary w-100 mt-2">Randomize Genre Likeability</button>
-                    <div class="mt-4">
-                        <label for="diversitySlider" class="form-label">Diversity Level:</label>
-                        <input type="range" class="form-range" id="diversitySlider" min="0" max="4" step="1" value="0">
-                        <div id="diversityInfo" class="mt-2 text-muted">None: No changes to odds</div>
+                    <div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                Odds Controls
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <button id="randomizeButton" class="btn btn-success w-100">Randomize All Odds</button>
                     </div>
-                    <div class="mt-4">
-                        <label for="minOdds" class="form-label">Min Odds to Randomize:</label>
+                    <div class="col-6">
+                        <button id="defaultOddsButton" class="btn btn-info w-100">Default Odds (100)</button>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <button id="randomizeJuryButton" class="btn btn-outline-success w-100">Randomize Jury Odds</button>
+                    </div>
+                    <div class="col-6">
+                        <button id="randomizeTeleButton" class="btn btn-outline-success w-100">Randomize Tele Odds</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                Odds Settings
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="maxOddsDifference" class="form-label">Max Jury-Tele Odds Difference:</label>
+                    <input type="number" id="maxOddsDifference" class="form-control" value="75" min="0" max="499">
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <label for="minOdds" class="form-label">Min Odds:</label>
                         <input type="number" id="minOdds" class="form-control" value="1" min="1" max="500">
-                        <label for="maxOdds" class="form-label mt-2">Max Odds to Randomize:</label>
+                    </div>
+                    <div class="col-6">
+                        <label for="maxOdds" class="form-label">Max Odds:</label>
                         <input type="number" id="maxOdds" class="form-control" value="500" min="1" max="500">
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+                    <button id="randomizeGenresButton" class="btn btn-secondary w-100 mt-2">Randomize Genres</button>
+                    <button id="randomizeGenreLikeabilityButton" class="btn btn-secondary w-100 mt-2">Randomize Genre Likeability</button>
+                    
                     <div class="mt-4">
                         <label for="revealTime" class="form-label">Time before revealing qualifier (seconds):</label>
                         <select id="revealTime" class="form-select">
@@ -447,15 +488,22 @@
                         <h3 class="mt-4">Genre Likeability</h3>
                         <div id="genreLikeability"></div>
                     </div>
+		<div class="mt-4">
+  			 <label for="votingSystem" class="form-label">Voting System:</label>
+    			 <select id="votingSystem" class="form-select">
+    			    <option value="current">1-8, 10, 12 with Jury Voting in Semi-Finals</option>
+       			    <option value="noJurySemi">1-8, 10, 12 without Jury Voting in Semi-Finals</option>
+    		</select>
+		</div>	
                 </div>
             </div>
         </div>
     </div>
-    
+ 
     <div id="chartContainer" class="mt-4"></div>
     <div id="results" class="mt-4"></div>
 </div>
-
+ 
 <script>
 const chartContainer = document.createElement('div');
 chartContainer.id = 'chartContainer';
@@ -466,36 +514,36 @@ const currentContestants = [
     "Poland", "Portugal", "Romania", "San Marino", "Serbia", "Slovenia", "Spain", "Sweden", "Switzerland", "Ukraine",
     "United Kingdom"
 ];
-
+ 
 const oldContestants = [
     "Andorra", "Belarus", "Bosnia & Herz.", "Hungary", "Monaco", "Morocco", "Russia", "Slovakia", "Turkey"
 ];
-
+ 
 var customContestants = []
-
+ 
 var customContestantsFlag = []
-
+ 
 const genres = ["Pop", "Disco", "Dark Pop", "Pop Ballad", "Power Ballad", "Folk", "Country", "Jazz", "Rock", "Punk", "Heavy Metal", "Techno", "Rap"];
 let genreLikeability = {};
 genres.forEach(genre => genreLikeability[genre] = 3);
-
+ 
 function randomizeGenreLikeability() {
     genres.forEach(genre => {
         genreLikeability[genre] = Math.floor(Math.random() * 5) + 1;
     });
     updateGenreLikeabilityUI();
 }
-
+ 
 function updateGenreLikeabilityUI() {
     document.querySelectorAll('.genre-likeability').forEach(input => {
         input.value = genreLikeability[input.dataset.genre];
     });
 }
-
+ 
 document.getElementById('randomizeGenreLikeabilityButton').addEventListener('click', randomizeGenreLikeability);
-
+ 
 var customcountryCodeMap = {}
-
+ 
 function getCountryCode(countryName) {
     const countryCodeMap = {
         "Albania": "al", "Armenia": "am", "Australia": "au", "Austria": "at", "Azerbaijan": "az",
@@ -512,9 +560,12 @@ function getCountryCode(countryName) {
     };
     return (countryCodeMap[countryName] || customcountryCodeMap[countryName]) || "unknown";
 }
-
+ 
 function createCountryTable(containerId, countries) {
     const container = document.getElementById(containerId);
+    container.querySelectorAll('.jury-odds-input, .tele-odds-input').forEach(input => {
+        input.addEventListener('change', validateOddsDifference);
+    });
     let html = '';
     for (let i = 0; i < countries.length; i += 3) {
         html += '<tr>';
@@ -530,7 +581,10 @@ function createCountryTable(containerId, countries) {
                             <span class="flag-icon flag-icon-${getCountryCode(countries[j])} ml-2"></span>
                         </span>
                     </div>
-                    <input type="number" class="form-control odds-input" min="1" max="500" value="100">
+                    <div class="odds-inputs">
+                        <input type="number" class="form-control jury-odds-input" min="1" max="500" value="100" placeholder="Jury Odds">
+                        <input type="number" class="form-control tele-odds-input" min="1" max="500" value="100" placeholder="Tele Odds">
+                    </div>
                     <select class="genre-select">
                         ${genres.map(genre => `<option value="${genre}">${genre}</option>`).join('')}
                     </select>
@@ -541,12 +595,12 @@ function createCountryTable(containerId, countries) {
     }
     container.innerHTML = html;
 }
-
+ 
 createCountryTable('currentContestants', currentContestants);
 createCountryTable('oldContestants', oldContestants);
 createCountryTable('customContestants', customContestants);
-
-
+ 
+ 
 const generateButton = document.getElementById('generateButton');
 const randomizeButton = document.getElementById('randomizeButton');
 const defaultOddsButton = document.getElementById('defaultOddsButton');
@@ -567,9 +621,17 @@ const addCustomContestantButton = document.getElementById('add_contestant');
 const showCustomContestantButton = document.getElementById('show_custom');
 const importCustomContestantButton = document.getElementById('import_custom');
 const exportCustomContestantButton = document.getElementById('export_custom');
-
+const randomizeJuryButton = document.getElementById('randomizeJuryButton');
+const randomizeTeleButton = document.getElementById('randomizeTeleButton');
+ 
 let semiFinal1Results, semiFinal2Results, finalResults;
 let currentSemiFinal = 1;
+ 
+let selectedVotingSystem = 'current';
+
+document.getElementById('votingSystem').addEventListener('change', (e) => {
+    selectedVotingSystem = e.target.value;
+});
 
 function randomizeGenres() {
     document.querySelectorAll('.genre-select').forEach(select => {
@@ -577,18 +639,18 @@ function randomizeGenres() {
         select.selectedIndex = randomIndex;
     });
 }
-
+ 
 function calculateGenreBonus(selectedCountries) {
     const genreCounts = {};
     genres.forEach(genre => genreCounts[genre] = 0);
-
+ 
     selectedCountries.forEach(country => {
         genreCounts[country.genre]++;
     });
-
+ 
     const totalCountries = selectedCountries.length;
     const genreBonuses = {};
-
+ 
     Object.entries(genreCounts).forEach(([genre, count]) => {
         const percentage = (count / totalCountries) * 100;
         if (percentage > 30) {
@@ -599,71 +661,107 @@ function calculateGenreBonus(selectedCountries) {
             genreBonuses[genre] = 1;
         }
     });
-
+ 
     return genreBonuses;
 }
 
-randomizeButton.addEventListener('click', () => {
+randomizeJuryButton.addEventListener('click', () => {
     const minOdds = parseInt(document.getElementById('minOdds').value);
     const maxOdds = parseInt(document.getElementById('maxOdds').value);
-    document.querySelectorAll('.odds-input').forEach(input => {
-        input.value = Math.floor(Math.random() * (maxOdds - minOdds + 1)) + minOdds;
+    const maxDifference = parseInt(document.getElementById('maxOddsDifference').value);
+
+    document.querySelectorAll('.odds-inputs').forEach(container => {
+        const juryInput = container.querySelector('.jury-odds-input');
+        const teleInput = container.querySelector('.tele-odds-input');
+
+        const teleOdds = parseInt(teleInput.value);
+        const juryOdds = getRandomOdds(minOdds, maxOdds, teleOdds, maxDifference);
+
+        juryInput.value = juryOdds;
     });
 });
 
+randomizeTeleButton.addEventListener('click', () => {
+    const minOdds = parseInt(document.getElementById('minOdds').value);
+    const maxOdds = parseInt(document.getElementById('maxOdds').value);
+    const maxDifference = parseInt(document.getElementById('maxOddsDifference').value);
+
+    document.querySelectorAll('.odds-inputs').forEach(container => {
+        const juryInput = container.querySelector('.jury-odds-input');
+        const teleInput = container.querySelector('.tele-odds-input');
+
+        const juryOdds = parseInt(juryInput.value);
+        const teleOdds = getRandomOdds(minOdds, maxOdds, juryOdds, maxDifference);
+
+        teleInput.value = teleOdds;
+    });
+});
+ 
+randomizeButton.addEventListener('click', () => {
+    const minOdds = parseInt(document.getElementById('minOdds').value);
+    const maxOdds = parseInt(document.getElementById('maxOdds').value);
+    const maxDifference = parseInt(document.getElementById('maxOddsDifference').value);
+
+    document.querySelectorAll('.odds-inputs').forEach(container => {
+        const juryInput = container.querySelector('.jury-odds-input');
+        const teleInput = container.querySelector('.tele-odds-input');
+
+        const baseOdds = Math.floor(Math.random() * (maxOdds - minOdds + 1)) + minOdds;
+        const juryOdds = baseOdds;
+        const teleOdds = getRandomOdds(minOdds, maxOdds, baseOdds, maxDifference);
+
+        juryInput.value = juryOdds;
+        teleInput.value = teleOdds;
+    });
+});
+
+document.querySelectorAll('.jury-odds-input, .tele-odds-input').forEach(input => {
+    input.addEventListener('change', validateOddsDifference);
+});
+ 
 defaultOddsButton.addEventListener('click', () => {
-    document.querySelectorAll('.odds-input').forEach(input => {
+    document.querySelectorAll('.jury-odds-input, .tele-odds-input').forEach(input => {
         input.value = 100;
     });
 });
 
-selectAllCurrentButton.addEventListener('click', () => {
-    document.querySelectorAll('#currentContestants .country-checkbox').forEach(checkbox => {
-        checkbox.checked = true;
-        checkbox.nextElementSibling.nextElementSibling.disabled = false;
+function validateOddsDifference(event) {
+    const container = event.target.closest('.odds-inputs');
+    const juryInput = container.querySelector('.jury-odds-input');
+    const teleInput = container.querySelector('.tele-odds-input');
+    const maxDifference = parseInt(document.getElementById('maxOddsDifference').value);
+
+    const juryOdds = parseInt(juryInput.value);
+    const teleOdds = parseInt(teleInput.value);
+
+    if (Math.abs(juryOdds - teleOdds) > maxDifference) {
+        alert(`The difference between Jury and Televoting odds cannot exceed ${maxDifference}.`);
+        event.target.value = event.target === juryInput ? teleOdds : juryOdds;
+    }
+}
+ 
+[selectAllCurrentButton, selectAllOldButton, selectAllCustomButton].forEach(button => {
+    button.addEventListener('click', () => {
+        console.log(`Select All button clicked: ${button.id}`);
+        const tableId = button.id.replace('selectAll', '').toLowerCase();
+        document.querySelectorAll(`#${tableId}Contestants .country-checkbox`).forEach(checkbox => {
+            checkbox.checked = true;
+        });
+        updateAQCheckboxStatus();
     });
 });
 
-selectAllOldButton.addEventListener('click', () => {
-    document.querySelectorAll('#oldContestants .country-checkbox').forEach(checkbox => {
-        checkbox.checked = true;
-        checkbox.nextElementSibling.nextElementSibling.disabled = false;
+[unselectAllCurrentButton, unselectAllOldButton, unselectAllCustomButton].forEach(button => {
+    button.addEventListener('click', () => {
+        console.log(`Unselect All button clicked: ${button.id}`);
+        const tableId = button.id.replace('unselectAll', '').toLowerCase();
+        document.querySelectorAll(`#${tableId}Contestants .country-checkbox`).forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        updateAQCheckboxStatus();
     });
 });
-
-selectAllCustomButton.addEventListener('click', () => {
-    document.querySelectorAll('#customContestants .country-checkbox').forEach(checkbox => {
-        checkbox.checked = true;
-        checkbox.nextElementSibling.disabled = false;
-    });
-});
-
-unselectAllCurrentButton.addEventListener('click', () => {
-    document.querySelectorAll('#currentContestants .country-checkbox').forEach(checkbox => {
-        checkbox.checked = false;
-        checkbox.nextElementSibling.nextElementSibling.checked = false;
-        checkbox.nextElementSibling.nextElementSibling.disabled = true;
-    });
-});
-
-unselectAllOldButton.addEventListener('click', () => {
-    document.querySelectorAll('#oldContestants .country-checkbox').forEach(checkbox => {
-        checkbox.checked = false;
-        checkbox.nextElementSibling.nextElementSibling.checked = false;
-        checkbox.nextElementSibling.nextElementSibling.disabled = true;
-    });
-});
-
-
-unselectAllCustomButton.addEventListener('click', () => {
-    document.querySelectorAll('#customContestants .country-checkbox').forEach(checkbox => {
-        checkbox.checked = false;
-        checkbox.nextElementSibling.checked = false;
-        checkbox.nextElementSibling.disabled = true;
-    });
-});
-
-
+ 
 function makeid(length) {
     let result = '';
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -675,9 +773,9 @@ function makeid(length) {
     }
     return result;
 }
-
+ 
 const addCSS = css => document.head.appendChild(document.createElement("style")).innerHTML=css;
-
+ 
 addCustomContestantButton.addEventListener('click', () => {
     var con_name = "";
     if (document.getElementById('custom_name').value.replace(/\s/g, '') == "") {
@@ -705,13 +803,17 @@ addCustomContestantButton.addEventListener('click', () => {
     document.getElementById('custom_name').value = "";
     document.getElementById('custom_code').value = "";
     document.getElementById('custom_flag').value = "";
-});
 
+    document.querySelectorAll('#customContestants .country-checkbox').forEach(addCheckboxListeners);
+
+    updateAQCheckboxStatus();
+});
+ 
 showCustomContestantButton.addEventListener('click', () => {
     document.getElementById('custom_showing').style.display = document.getElementById('custom_showing').style.display == "none" ? "flex" : "none";
 })
-
-importCustomContestantButton.addEventListener('click', () => {
+ 
+importCustomContestantButton.addEventListener('click', async () => {
     //customContestants.
     let str = prompt("Enter your export: (The export will not overwrite contestants you have already entered.)");
     const saveList = JSON.parse(str)
@@ -722,26 +824,23 @@ importCustomContestantButton.addEventListener('click', () => {
     for (var i = 0; i < saveList[0].length; i++) {
         addCSS(`.flag-icon-${saveList[1][Object.keys(saveList[1])[i]].replace(/\s/g, '')}{ background-image: url("${saveList[2][i].replace(/\s/g, '')}"); }`)
     }
-    
-    setTimeout( async function(){alert("Imported!")})
+ 
+    alert("Imported!")
     createCountryTable('customContestants', customContestants);
 })
-
-
-exportCustomContestantButton.addEventListener('click', () => {
-    setTimeout( async function(){
-        var res = JSON.stringify([customContestants, customcountryCodeMap, customContestantsFlag]);
+ 
+ 
+exportCustomContestantButton.addEventListener('click', async () => {
+    var res = JSON.stringify([customContestants, customcountryCodeMap, customContestantsFlag]);
     await navigator.clipboard.writeText(res);
-    alert("Exported, and copied to your clipboard. Save this data somewhere so you don't lose it.")},200)
-    
-    
+    alert("Exported, and copied to your clipboard. Save this data somewhere so you don't lose it.")
 })
-
-
+ 
+ 
 function hideSettingsShowSimulation() {
     document.querySelector('.settings-card').style.display = 'none';
     resultsDiv.innerHTML = '';
-    
+ 
     const simulationArea = document.createElement('div');
     simulationArea.id = 'simulationArea';
     simulationArea.innerHTML = `
@@ -754,7 +853,8 @@ function hideSettingsShowSimulation() {
                         <tr>
                             <th>Country</th>
                             <th>Genre</th>
-                            <th>Odds</th>
+                            <th>Jury Odds</th>
+                            <th>Tele Odds</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -767,7 +867,8 @@ function hideSettingsShowSimulation() {
                         <tr>
                             <th>Country</th>
                             <th>Genre</th>
-                            <th>Odds</th>
+                            <th>Jury Odds</th>
+                            <th>Tele Odds</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -777,17 +878,17 @@ function hideSettingsShowSimulation() {
         <button id="nextSemiFinalButton" class="btn btn-primary mt-3" style="display: none;">Proceed to Semi-Final 2</button>
         <div class="semi-final-charts"></div>
     `;
-    
+ 
     document.querySelector('.settings-card').insertAdjacentElement('afterend', simulationArea);
 }
-
+ 
 function populateSemiFinalTable(results) {
     const table = document.getElementById('semiFinalTable').getElementsByTagName('tbody')[0];
     table.innerHTML = '';
-    
+
     const sortedCountries = Object.entries(results)
         .sort(([a], [b]) => a.localeCompare(b));
-    
+
     sortedCountries.forEach(([country, data]) => {
         const row = table.insertRow();
         row.innerHTML = `
@@ -796,21 +897,24 @@ function populateSemiFinalTable(results) {
                 <span class="flag-icon flag-icon-${getCountryCode(country)} ml-2"></span>
             </td>
             <td>${data.genre}</td>
-            <td>${data.odds}</td>
+            <td>${data.juryOdds}</td>
+            <td>${data.teleOdds}</td>
         `;
     });
 }
-
+ 
 generateButton.addEventListener('click', () => {
     const selectedCountries = Array.from(document.querySelectorAll('.country-checkbox:checked'))
         .map(checkbox => {
             const containerDiv = checkbox.closest('.checkbox-container');
-            const oddsInput = containerDiv.nextElementSibling;
+            const juryOddsInput = containerDiv.nextElementSibling.querySelector('.jury-odds-input');
+            const teleOddsInput = containerDiv.nextElementSibling.querySelector('.tele-odds-input');
             const genreSelect = containerDiv.nextElementSibling.nextElementSibling;
-            const odds = parseInt(oddsInput.value) || 100;
+            const juryOdds = parseInt(juryOddsInput.value) || 100;
+            const teleOdds = parseInt(teleOddsInput.value) || 100;
             const isAQ = containerDiv.querySelector('.aq-checkbox').checked;
             const genre = genreSelect.value;
-            return { name: checkbox.value, odds: odds, isAQ: isAQ, genre: genre };
+            return { name: checkbox.value, juryOdds: juryOdds, teleOdds: teleOdds, isAQ: isAQ, genre: genre };
         });
 
     if (selectedCountries.length < 10 || selectedCountries.length > 50) {
@@ -818,10 +922,17 @@ generateButton.addEventListener('click', () => {
         return;
     }
 
-    const genreBonuses = calculateGenreBonus(selectedCountries);
+    const autoQualifiers = selectedCountries.filter(country => country.isAQ);
+    if (autoQualifiers.length > 10) {
+        alert('You can select a maximum of 10 auto-qualifiers.');
+        return;
+    }
 
+ 
+    const genreBonuses = calculateGenreBonus(selectedCountries);
+ 
     resultsDiv.innerHTML = '<div class="text-center my-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p>Generating results...</p></div>';
-    
+ 
      setTimeout(() => {
         if (selectedCountries.length > 26) {
             const contestResults = runContest(selectedCountries, genreBonuses);
@@ -833,23 +944,23 @@ generateButton.addEventListener('click', () => {
             semiFinal2Button.disabled = false;
             semiFinal1Button.classList.add('btn-pink');
             semiFinal2Button.classList.add('btn-pink');
-            
+ 
             document.querySelector('.settings-card').style.display = 'none';
-            resultsDiv.innerHTML = '<button id="showChartsButton" class="btn btn-info mt-3" style="display: none;">Show Semi-Final Charts</button>';
-            
+            resultsDiv.innerHTML = '<button id="showChartsButton" style="display: none;"> class="btn btn-info mt-3">Show Semi-Final Charts</button>';
+ 
             document.getElementById('showChartsButton').addEventListener('click', function() {
                 chartContainer.style.display = 'block';
                 chartContainer.innerHTML = `
                     ${createSemiFinalTable(semiFinal1Results)}
                     ${createSemiFinalTable(semiFinal2Results)}
-                    ${createVotingChart(semiFinal1Results, "Jury Voting - Semi-Final 1", false)}
+                    ${selectedVotingSystem === 'current' ? createVotingChart(semiFinal1Results, "Jury Voting - Semi-Final 1", false) : ''}
                     ${createVotingChart(semiFinal1Results, "Televoting - Semi-Final 1", true)}
-                    ${createVotingChart(semiFinal2Results, "Jury Voting - Semi-Final 2", false)}
+                    ${selectedVotingSystem === 'current' ? createVotingChart(semiFinal2Results, "Jury Voting - Semi-Final 2", false) : ''}
                     ${createVotingChart(semiFinal2Results, "Televoting - Semi-Final 2", true)}
                 `;
                 this.style.display = 'none';
             });
-            
+ 
             simulateButton.disabled = false;
             document.getElementById('simulateSemiDrawButton').disabled = false;
         } else {
@@ -866,14 +977,16 @@ generateButton.addEventListener('click', () => {
     }, 1000);
 });
 
+updateAQCheckboxStatus();
+ 
 semiFinal1Button.addEventListener('click', () => {
     displaySemiFinals(semiFinal1Results, "Semi-Final 1");
 });
-
+ 
 semiFinal2Button.addEventListener('click', () => {
     displaySemiFinals(semiFinal2Results, "Semi-Final 2");
 });
-
+ 
 finaleButton.addEventListener('click', () => {
     if (finalResults.results) {
         displayFinalResults(finalResults);
@@ -881,17 +994,17 @@ finaleButton.addEventListener('click', () => {
         displayResults(finalResults.results, Object.keys(finalResults.results).map(name => ({ name, odds: finalResults.results[name].odds, genre: finalResults.results[name].genre })), finalResults.votingOrder);
     }
 });
-
+ 
 simulateButton.addEventListener('click', () => {
     simulateButton.disabled = true;
     hideSettingsShowSimulation();
     populateSemiFinalTable(currentSemiFinal === 1 ? semiFinal1Results.results : semiFinal2Results.results);
-    
+ 
     const semiFinalTable = document.getElementById('semiFinalTable').getElementsByTagName('tbody')[0];
     const qualifiedTable = document.getElementById('qualifiedTable').getElementsByTagName('tbody')[0];
     const timerDisplay = document.getElementById('timerDisplay');
     const revealTime = parseInt(document.getElementById('revealTime').value);
-    
+ 
     const allCountries = Array.from(semiFinalTable.rows).map(row => ({
         element: row,
         country: row.cells[0].textContent.trim(),
@@ -902,20 +1015,20 @@ simulateButton.addEventListener('click', () => {
             : semiFinal2Results.results[row.cells[0].textContent.trim()].juryTotal + 
               semiFinal2Results.results[row.cells[0].textContent.trim()].teleTotal
     }));
-
+ 
     const topTen = allCountries
         .sort((a, b) => b.points - a.points)
         .slice(0, 10);
-
+ 
     for (let i = topTen.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [topTen[i], topTen[j]] = [topTen[j], topTen[i]];
     }
-    
+ 
     function updateTimer(secondsLeft) {
         timerDisplay.textContent = `Next country in: ${secondsLeft} seconds`;
     }
-
+ 
     function revealCountry(index) {
         if (index < topTen.length) {
             let secondsLeft = revealTime;
@@ -929,9 +1042,9 @@ simulateButton.addEventListener('click', () => {
                     const newRow = qualifiedTable.insertRow();
                     newRow.innerHTML = countryData.element.innerHTML;
                     newRow.classList.add('table-success');
-                    
+ 
                     semiFinalTable.deleteRow(Array.from(semiFinalTable.rows).indexOf(countryData.element));
-                    
+ 
                     revealCountry(index + 1);
                 }
             }, 1000);
@@ -946,10 +1059,10 @@ simulateButton.addEventListener('click', () => {
             simulateButton.disabled = false;
         }
     }
-    
+ 
     revealCountry(0);
 });
-
+ 
 document.addEventListener('click', function(e) {
     if (e.target && e.target.id === 'nextSemiFinalButton') {
         currentSemiFinal = 2;
@@ -957,13 +1070,13 @@ document.addEventListener('click', function(e) {
         populateSemiFinalTable(semiFinal2Results.results);
         simulateButton.disabled = false;
         e.target.style.display = 'none';
-        
+ 
         const existingSimulationArea = document.getElementById('simulationArea');
         if (existingSimulationArea) {
             existingSimulationArea.remove();
         }
     }
-    
+ 
     if (e.target && e.target.id === 'showChartsButton') {
         const chartsDiv = document.querySelector('.semi-final-charts');
         chartsDiv.style.display = 'block';
@@ -975,40 +1088,23 @@ document.addEventListener('click', function(e) {
         e.target.style.display = 'none';
     }
 });
-
-function updateDiversityInfo() {
-    const slider = document.getElementById('diversitySlider');
-    const info = document.getElementById('diversityInfo');
-    const levels = ['None: No changes to odds', 'Small: ±20', 'Medium: ±50', 'Big: ±100', 'Ultra: ±200'];
-    info.textContent = levels[slider.value];
+ 
+ 
+function getRandomOdds(min, max, baseOdds, maxDifference) {
+    const lowerBound = Math.max(min, baseOdds - maxDifference);
+    const upperBound = Math.min(max, baseOdds + maxDifference);
+    return Math.floor(Math.random() * (upperBound - lowerBound + 1)) + lowerBound;
 }
-
-function applyDiversity(baseOdds) {
-    const slider = document.getElementById('diversitySlider');
-    const diversityLevel = parseInt(slider.value);
-    const ranges = [0, 20, 50, 100, 200];
-    const range = ranges[diversityLevel];
-    
-    if (range === 0) return { jury: baseOdds, tele: baseOdds };
-    
-    const isJuryChange = Math.random() < 0.5;
-    const change = Math.floor(Math.random() * (range * 2 + 1)) - range;
-    
-    return {
-        jury: isJuryChange ? Math.max(1, Math.min(500, baseOdds + change)) : baseOdds,
-        tele: !isJuryChange ? Math.max(1, Math.min(500, baseOdds + change)) : baseOdds
-    };
-}
-
+ 
 function calculateWeight(odds) {
     const base = Math.min(odds, 500);
     const weight = Math.max(1, Math.round(100000 / (Math.pow(base, 1.5) + 100)));
     return weight;
 }
-
+ 
 function createWeightedCountries(availableCountries, oddsType) {
     const weights = availableCountries.map(country => {
-        const odds = results[country.name] ? results[country.name][oddsType] : country.odds;
+        const odds = results[country.name] ? results[country.name][oddsType] : country[oddsType];
         return { country: country.name, weight: calculateWeight(odds) };
     });
 
@@ -1020,16 +1116,16 @@ function createWeightedCountries(availableCountries, oddsType) {
         weight: Math.max(1, Math.round(item.weight * scaleFactor))
     }));
 }
-
+ 
 function selectVotingCountries(weightedCountries) {
     const selectedCountries = [];
     const points = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1];
-    
+ 
     for (let i = 0; i < points.length; i++) {
         let totalWeight = weightedCountries.reduce((sum, country) => sum + country.weight, 0);
         let randomWeight = Math.random() * totalWeight;
         let selectedCountry;
-
+ 
         for (const country of weightedCountries) {
             randomWeight -= country.weight;
             if (randomWeight <= 0) {
@@ -1037,7 +1133,7 @@ function selectVotingCountries(weightedCountries) {
                 break;
             }
         }
-
+ 
         if (selectedCountry) {
             selectedCountries.push(selectedCountry);
             weightedCountries = weightedCountries.filter(c => c.country !== selectedCountry);
@@ -1047,28 +1143,27 @@ function selectVotingCountries(weightedCountries) {
             weightedCountries = weightedCountries.filter(c => c.country !== remainingCountry);
         }
     }
-
+ 
     return selectedCountries;
 }
-
+ 
 function generateVotingResults(countries, votingCountries = null, genreBonuses) {
     const results = {};
     const allCountries = votingCountries || countries;
-    
+
     allCountries.forEach(country => {
-        const diverseOdds = applyDiversity(country.odds);
         const genreBonus = genreBonuses[country.genre] || 1;
-        const likeabilityFactor = (6 - genreLikeability[country.genre]) / 3;
-        const adjustedOdds = Math.round(country.odds * genreBonus * likeabilityFactor);
-        
+        const likeabilityFactor = (1 + genreLikeability[country.genre]) / 4;
+        const adjustedJuryOdds = Math.round(country.juryOdds * genreBonus * likeabilityFactor);
+        const adjustedTeleOdds = Math.round(country.teleOdds * genreBonus * likeabilityFactor);
+
         results[country.name] = { 
             juryTotal: 0, 
             teleTotal: 0, 
             juryVotesGiven: {}, 
             teleVotesGiven: {}, 
-            odds: adjustedOdds,
-            juryOdds: Math.round(diverseOdds.jury * genreBonus * likeabilityFactor),
-            teleOdds: Math.round(diverseOdds.tele * genreBonus * likeabilityFactor),
+            juryOdds: adjustedJuryOdds,
+            teleOdds: adjustedTeleOdds,
             juryPlacement: 0,
             telePlacement: 0,
             isAQ: country.isAQ,
@@ -1078,56 +1173,61 @@ function generateVotingResults(countries, votingCountries = null, genreBonuses) 
     });
 
     const points = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1];
-
     const votingOrder = (votingCountries || countries).map(c => c.name).sort(() => 0.5 - Math.random());
 
     votingOrder.forEach(voter => {
         const availableCountries = countries.filter(c => c.name !== voter);
-        const juryWeightedCountries = createWeightedCountries(availableCountries, 'juryOdds');
         const teleWeightedCountries = createWeightedCountries(availableCountries, 'teleOdds');
-
-        const juryVotedCountries = selectVotingCountries(juryWeightedCountries);
         const teleVotedCountries = selectVotingCountries(teleWeightedCountries);
 
         if (results[voter]) {
-            juryVotedCountries.forEach((country, index) => {
-                results[voter].juryVotesGiven[country] = points[index];
-                results[country].juryTotal += points[index];
-            });
-
+            // Always calculate televoting
             teleVotedCountries.forEach((country, index) => {
                 results[voter].teleVotesGiven[country] = points[index];
                 results[country].teleTotal += points[index];
             });
+
+            // Only calculate jury voting if it's the final or if using the current system in semi-finals
+            if (selectedVotingSystem === 'current' || votingCountries) {
+                const juryWeightedCountries = createWeightedCountries(availableCountries, 'juryOdds');
+                const juryVotedCountries = selectVotingCountries(juryWeightedCountries);
+                juryVotedCountries.forEach((country, index) => {
+                    results[voter].juryVotesGiven[country] = points[index];
+                    results[country].juryTotal += points[index];
+                });
+            }
         }
     });
-
-    const sortedJury = Object.keys(results)
-        .filter(country => results[country].isCompeting)
-        .sort((a, b) => results[b].juryTotal - results[a].juryTotal);
 
     const sortedTele = Object.keys(results)
         .filter(country => results[country].isCompeting)
         .sort((a, b) => results[b].teleTotal - results[a].teleTotal);
 
-    sortedJury.forEach((country, index) => {
-        results[country].juryPlacement = results[country].juryTotal > 0 ? index + 1 : `<p style="color:red;">${sortedJury.length} (0p)</p>`;
-    });
+    if (selectedVotingSystem === 'current' || votingCountries) {
+        sortedTele.forEach((country, index) => {
+            results[country].telePlacement = results[country].teleTotal > 0 ? index + 1 : `<p style="color:red;">${sortedTele.length} (0p)</p>`;
+        });
 
-    sortedTele.forEach((country, index) => {
-        results[country].telePlacement = results[country].teleTotal > 0 ? index + 1 : `<p style="color:red;">${sortedTele.length} (0p)</p>`;
-    });
+        const sortedJury = Object.keys(results)
+            .filter(country => results[country].isCompeting)
+            .sort((a, b) => results[b].juryTotal - results[a].juryTotal);
+
+        sortedJury.forEach((country, index) => {
+            results[country].juryPlacement = results[country].juryTotal > 0 ? index + 1 : `<p style="color:red;">${sortedJury.length} (0p)</p>`;
+        });
+    }
 
     return { results, votingOrder };
 }
 
+ 
 function runContest(countries, genreBonuses) {
     if (countries.length <= 26) {
         return generateVotingResults(countries, null, genreBonuses);
     } else {
-        const autoQualifiers = countries.filter(c => c.isAQ).slice(0, 6);
+        const autoQualifiers = countries.filter(c => c.isAQ).slice(0, 10);
         const remainingCountries = countries.filter(c => !c.isAQ);
-        
+
         const shuffledCountries = [...remainingCountries].sort(() => 0.5 - Math.random());
         const semiFinal1Countries = shuffledCountries.slice(0, Math.ceil(shuffledCountries.length / 2));
         const semiFinal2Countries = shuffledCountries.slice(Math.ceil(shuffledCountries.length / 2));
@@ -1141,12 +1241,44 @@ function runContest(countries, genreBonuses) {
 
         const finalCountries = [...autoQualifiers, ...semiFinal1Qualifiers, ...semiFinal2Qualifiers];
         const allVotingCountries = [...countries];
-	const finalResults = generateVotingResults(finalCountries, allVotingCountries, genreBonuses);
+        const finalResults = generateVotingResults(finalCountries, allVotingCountries, genreBonuses);
 
         return { semiFinal1, semiFinal2, finalResults };
     }
 }
 
+function updateAQCheckboxStatus() {
+    const totalSelectedCountries = 
+        document.querySelectorAll('#currentContestants .country-checkbox:checked').length +
+        document.querySelectorAll('#oldContestants .country-checkbox:checked').length +
+        document.querySelectorAll('#customContestants .country-checkbox:checked').length;
+
+    const shouldEnableAQ = totalSelectedCountries >= 27;
+
+    document.querySelectorAll('.country-checkbox').forEach(checkbox => {
+        const aqCheckbox = checkbox.nextElementSibling.nextElementSibling;
+        if (checkbox.checked && shouldEnableAQ) {
+            aqCheckbox.disabled = false;
+        } else {
+            aqCheckbox.disabled = true;
+            aqCheckbox.checked = false;
+        }
+    });
+
+    console.log(`Total selected countries: ${totalSelectedCountries}, AQ enabled: ${shouldEnableAQ}`);
+}
+
+function addCheckboxListeners(checkbox) {
+    checkbox.addEventListener('change', () => {
+        console.log(`Checkbox for ${checkbox.value} changed. Checked: ${checkbox.checked}`);
+        updateAQCheckboxStatus();
+    });
+}
+
+document.querySelectorAll('.country-checkbox').forEach(addCheckboxListeners);
+
+
+ 
 function displayResults(results, countries, votingOrder) {
     let html = `
         ${createVotingChart({ results, votingOrder }, "Jury Voting - Final", false)}
@@ -1161,7 +1293,8 @@ function displayResults(results, countries, votingOrder) {
                     <th>Jury Points</th>
                     <th>Tele Points</th>
                     <th>Total Points</th>
-                    <th>Odds</th>
+                    <th>Jury Odds</th>
+                    <th>Tele Odds</th>
                     <th>Jury Placement</th>
                     <th>Tele Placement</th>
                 </tr>
@@ -1188,7 +1321,8 @@ function displayResults(results, countries, votingOrder) {
                 <td class="points">${results[country.name].juryTotal}</td>
                 <td class="points">${results[country.name].teleTotal}</td>
                 <td class="points">${results[country.name].juryTotal + results[country.name].teleTotal}</td>
-                <td>${results[country.name].odds}</td>
+                <td class="placement">${results[country.name].juryOdds}</td>
+                <td class="placement">${results[country.name].teleOdds}</td>
                 <td class="placement">${results[country.name].juryPlacement}</td>
                 <td class="placement">${results[country.name].telePlacement}</td>
             </tr>
@@ -1202,32 +1336,46 @@ function displayResults(results, countries, votingOrder) {
 
     resultsDiv.innerHTML = html;
 }
-
+ 
 function getQualifiers(results, count) {
-    return Object.entries(results)
-        .sort((a, b) => (b[1].juryTotal + b[1].teleTotal) - (a[1].juryTotal + a[1].teleTotal))
-        .slice(0, count)
-        .map(([name, data]) => ({ name, odds: data.odds, genre: data.genre }));
+    const sortedCountries = Object.entries(results)
+        .sort((a, b) => {
+            if (selectedVotingSystem === 'current') {
+                const totalA = a[1].juryTotal + a[1].teleTotal;
+                const totalB = b[1].juryTotal + b[1].teleTotal;
+                if (totalA !== totalB) return totalB - totalA;
+            }
+            return b[1].teleTotal - a[1].teleTotal;
+        });
+
+    return sortedCountries.slice(0, count).map(([name, data]) => ({ 
+        name, 
+        juryOdds: data.juryOdds, 
+        teleOdds: data.teleOdds, 
+        genre: data.genre 
+    }));
 }
 
+ 
 function displaySemiFinals(semiFinal, title) {
     chartContainer.style.display = 'block';
     chartContainer.innerHTML = `
         <h3 class="results-headline">${title} Results</h3>
         ${createSemiFinalTable(semiFinal)}
-        ${createVotingChart(semiFinal, `Jury Voting - ${title}`, false)}
+        ${selectedVotingSystem === 'current' ? createVotingChart(semiFinal, `Jury Voting - ${title}`, false) : ''}
         ${createVotingChart(semiFinal, `Televoting - ${title}`, true)}
     `;
 }
-
+ 
 function createSemiFinalTable(semiFinal) {
     const sortedCountries = Object.keys(semiFinal.results)
         .sort((a, b) => {
-            const totalA = semiFinal.results[a].juryTotal + semiFinal.results[a].teleTotal;
-            const totalB = semiFinal.results[b].juryTotal + semiFinal.results[b].teleTotal;
-            if (totalA !== totalB) return totalB - totalA;
-            if (semiFinal.results[a].teleTotal !== semiFinal.results[b].teleTotal) return semiFinal.results[b].teleTotal - semiFinal.results[a].teleTotal;
-            return tiebreaker(semiFinal.results[b], semiFinal.results[a]);
+            if (selectedVotingSystem === 'current') {
+                const totalA = semiFinal.results[a].juryTotal + semiFinal.results[a].teleTotal;
+                const totalB = semiFinal.results[b].juryTotal + semiFinal.results[b].teleTotal;
+                if (totalA !== totalB) return totalB - totalA;
+            }
+            return semiFinal.results[b].teleTotal - semiFinal.results[a].teleTotal;
         });
 
     let html = `
@@ -1237,12 +1385,11 @@ function createSemiFinalTable(semiFinal) {
                     <th>Rank</th>
                     <th>Country</th>
                     <th>Genre</th>
-                    <th>Jury Points</th>
+                    ${selectedVotingSystem === 'current' ? '<th>Jury Points</th>' : ''}
                     <th>Tele Points</th>
-                    <th>Total Points</th>
-                    <th>Odds</th>
-                    <th>Jury Placement</th>
-                    <th>Tele Placement</th>
+                    ${selectedVotingSystem === 'current' ? '<th>Total Points</th>' : ''}
+                    ${selectedVotingSystem === 'current' ? '<th>Jury Placement</th>' : ''}
+                    ${selectedVotingSystem === 'current' ? '<th>Tele Placement</th>' : ''}
                 </tr>
             </thead>
             <tbody>
@@ -1259,12 +1406,11 @@ function createSemiFinalTable(semiFinal) {
                     <span class="flag-icon flag-icon-${getCountryCode(country)} ml-2"></span>
                 </td>
                 <td>${result.genre}</td>
-                <td class="points">${result.juryTotal}</td>
+                ${selectedVotingSystem === 'current' ? `<td class="points">${result.juryTotal}</td>` : ''}
                 <td class="points">${result.teleTotal}</td>
-                <td class="points">${result.juryTotal + result.teleTotal}</td>
-                <td>${result.odds}</td>
-                <td class="semi-placement">${result.juryPlacement}</td>
-                <td class="semi-placement">${result.telePlacement}</td>
+                ${selectedVotingSystem === 'current' ? `<td class="points">${result.juryTotal + result.teleTotal}</td>` : ''}
+                ${selectedVotingSystem === 'current' ? `<td class="semi-placement">${result.juryPlacement}</td>` : ''}
+                ${selectedVotingSystem === 'current' ? `<td class="semi-placement">${result.telePlacement}</td>` : ''}
             </tr>
         `;
     });
@@ -1276,8 +1422,12 @@ function createSemiFinalTable(semiFinal) {
 
     return html;
 }
-
+ 
 function createVotingChart(results, title, isTele = false) {
+    if (!isTele && selectedVotingSystem === 'noJurySemi' && !title.includes('Final')) {
+        return ''; // Don't create jury voting chart for semi-finals in no-jury system
+    }
+
     const { results: voteResults, votingOrder } = results;
     const sortedCountries = Object.keys(voteResults)
         .filter(country => voteResults[country].isCompeting)
@@ -1286,7 +1436,7 @@ function createVotingChart(results, title, isTele = false) {
             const totalB = isTele ? voteResults[b].teleTotal : voteResults[b].juryTotal;
             return totalB - totalA;
         });
-
+ 
     let html = `
         <h3 class="results-headline">${title}</h3>
         <div class="table-responsive">
@@ -1308,7 +1458,7 @@ function createVotingChart(results, title, isTele = false) {
                 </thead>
                 <tbody>
     `;
-
+ 
     sortedCountries.forEach((receiver, index) => {
         html += `
             <tr>
@@ -1329,24 +1479,24 @@ function createVotingChart(results, title, isTele = false) {
             </tr>
         `;
     });
-
+ 
     html += `
                 </tbody>
             </table>
         </div>
     `;
-
+ 
     return html;
 }
-
+ 
 function simulateSemiFinalesDrawn() {
     if (!semiFinal1Results || !semiFinal2Results) {
         alert("Please generate contest results first.");
         return;
     }
-
+ 
     const allCountries = [...Object.keys(semiFinal1Results.results), ...Object.keys(semiFinal2Results.results)].sort();
-    
+ 
     const drawSimulationDiv = document.createElement('div');
     drawSimulationDiv.className = 'col-md-10 draw-simulation';
     drawSimulationDiv.innerHTML = `
@@ -1387,56 +1537,56 @@ function simulateSemiFinalesDrawn() {
             </div>
         </div>
     `;
-
+ 
     const mainRow = document.querySelector('.eurovision-simulator > .row');
-
+ 
     const existingDrawSimulation = mainRow.querySelector('.draw-simulation');
     if (existingDrawSimulation) {
         existingDrawSimulation.remove();
     }
-
+ 
     mainRow.appendChild(drawSimulationDiv);
-
+ 
     document.getElementById('revealDrawButton').addEventListener('click', () => {
         document.getElementById('revealDrawButton').style.display = 'none';
         const semi1Table = document.getElementById('semi1DrawnTable');
         const semi2Table = document.getElementById('semi2DrawnTable');
         const allCountriesTable = document.getElementById('allCountriesTable');
-        
+ 
         const semi1Countries = Object.keys(semiFinal1Results.results);
         const semi2Countries = Object.keys(semiFinal2Results.results);
-        
+ 
         let index = 0;
-        
+ 
         function revealNextCountry() {
             if (index < allCountries.length) {
                 const country = allCountries[index];
                 const row = allCountriesTable.rows[index];
                 row.style.opacity = '0.5';
-                
+ 
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = row.innerHTML;
                 newRow.style.animation = 'fadeIn 1s';
-                
+ 
                 if (semi1Countries.includes(country)) {
                     semi1Table.appendChild(newRow);
                 } else if (semi2Countries.includes(country)) {
                     semi2Table.appendChild(newRow);
                 }
-                
+ 
                 index++;
                 setTimeout(revealNextCountry, 2000);
             } else {
                 document.getElementById('revealDrawButton').style.display = 'none';
             }
         }
-        
+ 
         revealNextCountry();
     });
 }
-
+ 
 document.getElementById('simulateSemiDrawButton').addEventListener('click', simulateSemiFinalesDrawn);
-
+ 
 function displayFinalResults(finalResults) {
     const { results, votingOrder } = finalResults;
     const sortedCountries = Object.keys(results)
@@ -1448,7 +1598,7 @@ function displayFinalResults(finalResults) {
             if (results[a].teleTotal !== results[b].teleTotal) return results[b].teleTotal - results[a].teleTotal;
             return tiebreaker(results[b], results[a]);
         });
-
+ 
     let html = `
         ${createVotingChart(finalResults, "Jury Voting - Final", false)}
         ${createVotingChart(finalResults, "Televoting - Final", true)}
@@ -1462,14 +1612,15 @@ function displayFinalResults(finalResults) {
                     <th>Jury Points</th>
                     <th>Tele Points</th>
                     <th>Total Points</th>
-                    <th>Odds</th>
+                    <th>Jury Odds</th>
+                    <th>Tele Odds</th>
                     <th>Jury Placement</th>
                     <th>Tele Placement</th>
                 </tr>
             </thead>
             <tbody>
     `;
-
+ 
     sortedCountries.forEach((country, index) => {
         html += `<tr class="${results[country].isAQ ? 'auto-qualifier' : ''}">
                 <td>${index + 1}</td>
@@ -1481,34 +1632,86 @@ function displayFinalResults(finalResults) {
                 <td class="points">${results[country].juryTotal}</td>
                 <td class="points">${results[country].teleTotal}</td>
                 <td class="points">${results[country].juryTotal + results[country].teleTotal}</td>
-                <td>${results[country].odds}</td>
+                <td class="placement">${results[country].juryOdds}</td>
+                <td class="placement">${results[country].teleOdds}</td>
                 <td class="placement">${results[country].juryPlacement}</td>
                 <td class="placement">${results[country].telePlacement}</td>
             </tr>
         `;
     });
 
+ 
     html += `
             </tbody>
         </table>
     `;
-
+ 
     resultsDiv.innerHTML = html;
 }
+ 
+function tiebreaker(a, b, previousOrder) {
+    // Compare total points
+    const totalA = a.juryTotal + a.teleTotal;
+    const totalB = b.juryTotal + b.teleTotal;
+    if (totalA !== totalB) {
+        return totalB - totalA;
+    }
 
-function tiebreaker(a, b) {
-    const juryPoints = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1];
+    // If total points are tied, compare televoting scores
+    if (a.teleTotal !== b.teleTotal) {
+        return b.teleTotal - a.teleTotal;
+    }
+
+    // If televoting scores are tied, compare jury scores
+    if (a.juryTotal !== b.juryTotal) {
+        return b.juryTotal - a.juryTotal;
+    }
+
+    // If jury scores are also tied, compare the number of countries that awarded points
+    const aCountriesVoted = Object.values(a.teleVotesGiven).filter(v => v > 0).length;
+    const bCountriesVoted = Object.values(b.teleVotesGiven).filter(v => v > 0).length;
+    if (aCountriesVoted !== bCountriesVoted) {
+        return bCountriesVoted - aCountriesVoted;
+    }
+
+    // If still tied, compare the number of 12 points received in televoting
+    const aTele12 = Object.values(a.teleVotesGiven).filter(v => v === 12).length;
+    const bTele12 = Object.values(b.teleVotesGiven).filter(v => v === 12).length;
+    if (aTele12 !== bTele12) {
+        return bTele12 - aTele12;
+    }
+
+    // Continue with 10 points, 8 points, etc. in televoting if needed
+    const telePoints = [10, 8, 7, 6, 5, 4, 3, 2, 1];
+    for (let point of telePoints) {
+        const aCount = Object.values(a.teleVotesGiven).filter(v => v === point).length;
+        const bCount = Object.values(b.teleVotesGiven).filter(v => v === point).length;
+        if (aCount !== bCount) return bCount - aCount;
+    }
+
+    // If still tied, repeat the process for jury votes
+    const aJury12 = Object.values(a.juryVotesGiven).filter(v => v === 12).length;
+    const bJury12 = Object.values(b.juryVotesGiven).filter(v => v === 12).length;
+    if (aJury12 !== bJury12) {
+        return bJury12 - aJury12;
+    }
+
+    const juryPoints = [10, 8, 7, 6, 5, 4, 3, 2, 1];
     for (let point of juryPoints) {
         const aCount = Object.values(a.juryVotesGiven).filter(v => v === point).length;
         const bCount = Object.values(b.juryVotesGiven).filter(v => v === point).length;
         if (aCount !== bCount) return bCount - aCount;
     }
+
+    // If everything is still tied, maintain the previous order
+    if (previousOrder) {
+        return previousOrder.indexOf(a.name) - previousOrder.indexOf(b.name);
+    }
+
+    // If no previous order is provided, countries remain in their current position
     return 0;
 }
-
-document.getElementById('diversitySlider').addEventListener('input', updateDiversityInfo);
-updateDiversityInfo();
-
+ 
 document.addEventListener('click', function(e) {
     if (e.target && e.target.id === 'showChartsButton') {
         chartContainer.style.display = 'block';
@@ -1520,13 +1723,13 @@ document.addEventListener('click', function(e) {
         e.target.style.display = 'none';
     }
 });
-
+ 
 document.querySelectorAll('.aq-checkbox').forEach(checkbox => {
     checkbox.disabled = !checkbox.previousElementSibling.previousElementSibling.checked;
 });
-
+ 
 document.getElementById('randomizeGenresButton').addEventListener('click', randomizeGenres);
-
+ 
 const genreLikeabilityContainer = document.getElementById('genreLikeability');
 genres.forEach(genre => {
     const div = document.createElement('div');
@@ -1536,7 +1739,7 @@ genres.forEach(genre => {
     `;
     genreLikeabilityContainer.appendChild(div);
 });
-
+ 
 document.querySelectorAll('.genre-likeability').forEach(input => {
     input.addEventListener('change', (e) => {
         const genre = e.target.dataset.genre;
@@ -1548,13 +1751,13 @@ document.querySelectorAll('.genre-likeability').forEach(input => {
         }
     });
 });
-
+ 
 dynamicVotingButton.addEventListener('click', () => {
     const { results, votingOrder } = finalResults;
     const competingCountries = Object.keys(results).filter(country => results[country].isCompeting);
-
+ 
     dynamicVotingArea.innerHTML = '';
-
+ 
     let html = `
         <h2>Dynamic Voting Simulation</h2>
         <div class="table-responsive">
@@ -1599,25 +1802,25 @@ dynamicVotingButton.addEventListener('click', () => {
         <button id="revealTelevotingButton" class="btn btn-success mt-3 reveal-button" style="display: none;">Reveal Televoting</button>
         <div id="debugInfo" class="mt-3"></div>
     `;
-
+ 
     dynamicVotingArea.innerHTML = html;
-
+ 
     let currentJuryIndex = 0;
     let isTelevotingMode = false;
     let rows;
     let currentTeleIndex = 0;
-
+ 
     function updateTable() {
         const tableBody = document.querySelector('.eurovision-table tbody');
         if (!tableBody) {
             console.error('Table body not found');
             return;
         }
-
+ 
         const rows = Array.from(tableBody.querySelectorAll('tr'));
-
+ 
         const currentPositions = new Map(rows.map((row, index) => [row.dataset.country, index]));
-
+ 
         rows.sort((a, b) => {
             const aTotal = parseInt(a.querySelector('.total-column').textContent) || 0;
             const bTotal = parseInt(b.querySelector('.total-column').textContent) || 0;
@@ -1628,29 +1831,29 @@ dynamicVotingButton.addEventListener('click', () => {
             const bCountry = b.dataset.country || '';
             return aCountry.localeCompare(bCountry);
         });
-
+ 
         rows.forEach((row, newIndex) => {
             const country = row.dataset.country;
             const oldIndex = currentPositions.get(country);
             const rankCell = row.querySelector('.rank');
             const countryNameCell = row.querySelector('.receiving-country');
-
+ 
             if (newIndex !== oldIndex) {
                 const direction = newIndex > oldIndex ? 'moving-down' : 'moving-up';
                 row.classList.add(direction);
                 setTimeout(() => row.classList.remove(direction), 2500);
-
+ 
                 const distance = (newIndex - oldIndex) * row.offsetHeight;
                 row.style.transform = `translateY(${distance}px)`;
-                
+ 
                 rankCell.textContent = newIndex + 1;
             }
-
+ 
             if (countryNameCell.classList.contains('tele-points-revealed')) {
                 row.classList.add('tele-revealed');
             }
         });
-
+ 
         setTimeout(() => {
             rows.forEach(row => {
                 row.style.transform = 'none';
@@ -1662,42 +1865,42 @@ dynamicVotingButton.addEventListener('click', () => {
             });
         }, 800);
     }
-
+ 
     function revealNextJury() {
         if (currentJuryIndex < votingOrder.length) {
             const votingCountry = votingOrder[currentJuryIndex];
             console.log(`Revealing jury votes for: ${votingCountry}`);
             document.getElementById('debugInfo').innerText = `Current Jury: ${votingCountry}`;
-
+ 
             if (!results[votingCountry] || !results[votingCountry].juryVotesGiven) {
                 console.error(`No jury votes found for ${votingCountry}`);
                 currentJuryIndex++;
                 revealNextJury();
                 return;
             }
-
+ 
             const juryVotes = results[votingCountry].juryVotesGiven;
-
+ 
             Object.entries(juryVotes).forEach(([receiver, points]) => {
                 const row = document.querySelector(`.eurovision-table tr[data-country="${receiver}"]`);
                 if (row) {
                     const pointsCell = row.querySelector(`.points-column[data-voter="${votingCountry}"]`);
                     const juryPointsCell = row.querySelector('.jury-points');
                     const totalPointsCell = row.querySelector('.total-column');
-                    
+ 
                     if (pointsCell && juryPointsCell && totalPointsCell) {
                         pointsCell.textContent = points;
                         pointsCell.classList.add(`points-${points}`, 'fade-in');
                         if (votingCountry === receiver) {
                             pointsCell.classList.add('self-vote');
                         }
-
+ 
                         const currentJuryPoints = parseInt(juryPointsCell.textContent) || 0;
                         const newJuryPoints = currentJuryPoints + points;
-                        
+ 
                         juryPointsCell.textContent = newJuryPoints;
                         totalPointsCell.textContent = newJuryPoints;
-                        
+ 
                         console.log(`${votingCountry} gave ${points} points to ${receiver}`);
                     } else {
                         console.error(`Unable to find all cells for ${receiver}`);
@@ -1706,10 +1909,10 @@ dynamicVotingButton.addEventListener('click', () => {
                     console.error(`Row not found for ${receiver}`);
                 }
             });
-
+ 
             setTimeout(updateTable, 100);
             currentJuryIndex++;
-
+ 
             if (currentJuryIndex === votingOrder.length) {
                 document.getElementById('nextJuryButton').style.display = 'none';
                 document.getElementById('revealTelevotingButton').style.display = 'inline-block';
@@ -1720,9 +1923,9 @@ dynamicVotingButton.addEventListener('click', () => {
             document.getElementById('revealTelevotingButton').style.display = 'inline-block';
         }
     }
-
+ 
     document.getElementById('nextJuryButton').addEventListener('click', revealNextJury);
-
+ 
     function revealNextTele() {
         if (currentTeleIndex < rows.length) {
             const row = rows[currentTeleIndex];
@@ -1734,24 +1937,24 @@ dynamicVotingButton.addEventListener('click', () => {
                 return;
             }
             const telePoints = results[country].teleTotal;
-            
+ 
             row.classList.add('current-televote');
-            
+ 
             const telePointsCell = row.querySelector('.tele-points');
             const totalPointsCell = row.querySelector('.total-column');
             const juryPointsCell = row.querySelector('.jury-points');
             const countryNameCell = row.querySelector('.receiving-country');
-            
+ 
             if (!telePointsCell || !totalPointsCell || !juryPointsCell || !countryNameCell) {
                 console.error(`Required cells not found for ${country}`);
                 currentTeleIndex++;
                 revealNextTele();
                 return;
             }
-            
+ 
             const currentJuryPoints = parseInt(juryPointsCell.textContent) || 0;
             const newTotalPoints = currentJuryPoints + telePoints;
-            
+ 
             setTimeout(() => {
                 telePointsCell.textContent = telePoints;
                 totalPointsCell.textContent = newTotalPoints;
@@ -1770,12 +1973,12 @@ dynamicVotingButton.addEventListener('click', () => {
             }, 1000);
         }
     }
-
+ 
     document.getElementById('revealTelevotingButton').addEventListener('click', () => {
         if (!isTelevotingMode) {
             isTelevotingMode = true;
             document.getElementById('revealTelevotingButton').textContent = 'Reveal Next Televote';
-            
+ 
             rows = Array.from(document.querySelectorAll('.eurovision-table tbody tr'));
             rows.sort((a, b) => {
                 const aJuryPoints = parseInt(a.querySelector('.jury-points')?.textContent) || 0;
@@ -1796,56 +1999,70 @@ dynamicVotingButton.addEventListener('click', () => {
             revealNextTele();
         }
     });
-
+ 
     updateTable();
 });
-
+ 
 document.getElementById('resetButton').addEventListener('click', () => {
-	
+    // Reset checkboxes and AQ status
+    document.querySelectorAll('.country-checkbox, .aq-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+        if (checkbox.classList.contains('aq-checkbox')) {
+            checkbox.disabled = true;
+        }
+    });
+
+    // Reset odds inputs
+    document.querySelectorAll('.jury-odds-input, .tele-odds-input').forEach(input => {
+        input.value = 100;
+    });
+
+    // Reset genre selections
+    document.querySelectorAll('.genre-select').forEach(select => {
+        select.selectedIndex = 0;
+    });
+
+    // Reset genre likeability
+    genres.forEach(genre => genreLikeability[genre] = 3);
+    updateGenreLikeabilityUI();
+
+
+    // Reset min and max odds
+    document.getElementById('minOdds').value = 1;
+    document.getElementById('maxOdds').value = 500;
+
+    // Reset reveal time
+    document.getElementById('revealTime').value = 10;
+
+    // Clear results and dynamic voting area
     resultsDiv.innerHTML = '';
     dynamicVotingArea.innerHTML = '';
-    
+
+    // Hide and clear chart containers
     const chartContainers = document.querySelectorAll('.semi-final-charts, #chartContainer');
     chartContainers.forEach(container => {
         container.innerHTML = '';
         container.style.display = 'none';
     });
 
+    // Remove simulation areas
     const simulationAreas = document.querySelectorAll('#simulationArea');
     simulationAreas.forEach(area => area.remove());
 
+    // Remove draw simulation
     const drawSimulation = document.querySelector('.draw-simulation');
     if (drawSimulation) {
         drawSimulation.remove();
     }
 
+    // Reset results variables
     semiFinal1Results = null;
     semiFinal2Results = null;
     finalResults = null;
     currentSemiFinal = 1;
 
-    document.querySelectorAll('.country-checkbox').forEach(checkbox => {
-        checkbox.checked = false;
-        const aqCheckbox = checkbox.nextElementSibling.nextElementSibling;
-        aqCheckbox.checked = false;
-        aqCheckbox.disabled = false;
-    });
-    document.querySelectorAll('.odds-input').forEach(input => {
-        input.value = 100;
-    });
-
-    document.getElementById('diversitySlider').value = 0;
-    updateDiversityInfo();
-
-    genres.forEach(genre => genreLikeability[genre] = 3);
-    updateGenreLikeabilityUI();
-
-    document.querySelectorAll('.genre-select').forEach(select => {
-        select.selectedIndex = 0;
-    });
-
+    // Reset button states
     document.getElementById('generateButton').disabled = false;
-
     semiFinal1Button.disabled = true;
     semiFinal2Button.disabled = true;
     finaleButton.disabled = true;
@@ -1856,11 +2073,44 @@ document.getElementById('resetButton').addEventListener('click', () => {
     semiFinal1Button.classList.remove('btn-pink');
     semiFinal2Button.classList.remove('btn-pink');
 
+    // Show settings card
     document.querySelector('.settings-card').style.display = 'block';
 
+    // Scroll to top
+    window.scrollTo(0, 0);
+
+    // Update AQ checkbox status
+    updateAQCheckboxStatus();
+   
+    document.querySelectorAll('.odds-input').forEach(input => {
+        input.value = 100;
+    });
+ 
+ 
+    genres.forEach(genre => genreLikeability[genre] = 3);
+    updateGenreLikeabilityUI();
+ 
+    document.querySelectorAll('.genre-select').forEach(select => {
+        select.selectedIndex = 0;
+    });
+ 
+    document.getElementById('generateButton').disabled = false;
+ 
+    semiFinal1Button.disabled = true;
+    semiFinal2Button.disabled = true;
+    finaleButton.disabled = true;
+    simulateButton.disabled = true;
+    dynamicVotingButton.disabled = true;
+    document.getElementById('simulateSemiDrawButton').disabled = true;
+ 
+    semiFinal1Button.classList.remove('btn-pink');
+    semiFinal2Button.classList.remove('btn-pink');
+ 
+    document.querySelector('.settings-card').style.display = 'block';
+ 
     window.scrollTo(0, 0);
 });
-
+ 
 document.getElementById('instructionsButton').addEventListener('click', () => {
     const instructionsHTML = `
         <div class="modal fade" id="instructionsModal" tabindex="-1" aria-labelledby="instructionsModalLabel" aria-hidden="true">
@@ -1895,13 +2145,13 @@ document.getElementById('instructionsButton').addEventListener('click', () => {
             </div>
         </div>
     `;
-
+ 
     document.body.insertAdjacentHTML('beforeend', instructionsHTML);
-
+ 
     const instructionsModal = new bootstrap.Modal(document.getElementById('instructionsModal'));
     instructionsModal.show();
 });
-
+ 
 document.getElementById('whatsNewButton').addEventListener('click', () => {
     const whatsNewHTML = `
         <div class="modal fade" id="whatsNewModal" tabindex="-1" aria-labelledby="whatsNewModalLabel" aria-hidden="true">
@@ -1912,10 +2162,18 @@ document.getElementById('whatsNewButton').addEventListener('click', () => {
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
+			<h6>Version 1.1.0 Updates and Bugfixes:</h6>
+                        <ul>
+			  <li style="color:green;"><ADDED> New mode which allows you to remove jury from the Semi-Finals. More systems soon!
+			   <li style="color:green;"><ADDED> Custom countries with its custom icons. Credits for this function goes to: <a href="https://www.reddit.com/user/stems_twice/">@stems_twice</a>. Thank you!
+		 	   <li style="color:orange;"><REMAKE> Separated odds for Televoting and Jury. Also the menu for odds got changed.
+			   <li style="color:orange;"><REMAKE> Simulator allows now 10 Auto-Qualifiers and are available after choosing 27 or more all countries altogether.
+			   <li>Hidden Odds in all charts and simulations</li>
+                        </ul>
                         <h6>Version 1.0.1 Updates and Bugfixes:</h6>
                         <ul>
-			   <li style="color:green;">Added this "What's New?" button to display recent changes and updates</li>
-                            <li style="color:green;">Added new genres: Heavy Metal, Techno, and Rap</li>
+			   <li style="color:green;"><ADDED> this "What's New?" button to display recent changes and updates</li>
+                            <li style="color:green;"><ADDED> new genres: Heavy Metal, Techno, and Rap</li>
                             <li>Genres are now displayed in a grid layout for better space utilization</li>
 			    <li>Whole menu changed it's location and is now horizontal </li>
                             <li>Dynamic finale table now appears <u>above the charts</u></li>
@@ -1930,13 +2188,14 @@ document.getElementById('whatsNewButton').addEventListener('click', () => {
             </div>
         </div>
     `;
-
+ 
     document.body.insertAdjacentHTML('beforeend', whatsNewHTML);
-
+ 
     const whatsNewModal = new bootstrap.Modal(document.getElementById('whatsNewModal'));
     whatsNewModal.show();
 });
-
+ updateAQCheckboxStatus();
+document.addEventListener('DOMContentLoaded', updateAQCheckboxStatus);
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
 </body>
