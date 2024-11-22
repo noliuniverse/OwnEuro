@@ -372,6 +372,8 @@
                 <div class="card-body">
                     <h5> V.1.1.0 </h5>
                     <h2>Select Participating Countries and Set Odds <br> (11-50 countries semi-finals starting with 27, odds -> lower is better):</h2>
+			<h3 id="selectedCount" style="color: black;">Total Selected Countries: 0/50</h3>
+
                     <div class="row">
                         <div class="col-md-8">
                             <div class="section-header">Current Contestants</div>
@@ -1264,6 +1266,8 @@ function updateAQCheckboxStatus() {
             aqCheckbox.checked = false;
         }
     });
+	const selectedCountElement = document.getElementById('selectedCount');
+	selectedCountElement.textContent = `Total Selected Countries: ${totalSelectedCountries}/50`;
 
     console.log(`Total selected countries: ${totalSelectedCountries}, AQ enabled: ${shouldEnableAQ}`);
 }
