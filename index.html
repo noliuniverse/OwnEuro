@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
     <title>Eurovision Song Contest Simulator with Semi-Finals and Dynamic Voting</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
@@ -523,7 +524,7 @@ const oldContestants = [
  
 var customContestants = []
  
-var customContestantsFlag = []
+var customContestantsFlag = {}
  
 const genres = ["Pop", "Disco", "Dark Pop", "Pop Ballad", "Power Ballad", "Folk", "Country", "Jazz", "Rock", "Punk", "Heavy Metal", "Techno", "Rap"];
 let genreLikeability = {};
@@ -798,8 +799,11 @@ addCustomContestantButton.addEventListener('click', () => {
     if (document.getElementById('custom_flag').value.replace(/\s/g, '') == "") {
         //pass
     } else {
-        customContestantsFlag.push(document.getElementById('custom_flag').value.replace(/\s/g, ''));
-        addCSS(`.flag-icon-${con_code}{ background-image: url("${document.getElementById('custom_flag').value.replace(/\s/g, '')}"); }`)
+        customContestantsFlag[con_code] = String(document.getElementById('custom_flag').value.replace(/\s/g, ''));
+        if (customContestantsFlag[con_code]) {
+            addCSS(`.flag-icon-${con_code}{ background-image: url("${document.getElementById('custom_flag').value.replace(/\s/g, '')}"); }`)
+
+        }
     }
     createCountryTable('customContestants', customContestants);
     document.getElementById('custom_name').value = "";
@@ -822,10 +826,13 @@ importCustomContestantButton.addEventListener('click', async () => {
     console.log(saveList)
     customContestants = [...customContestants, ...saveList[0]];
     customcountryCodeMap = {...customcountryCodeMap, ...saveList[1]};
-    customContestantsFlag = [...customContestantsFlag, ...saveList[2]];
+    customContestantsFlag = {...customContestantsFlag, ...saveList[2]};
     for (var i = 0; i < saveList[0].length; i++) {
-        addCSS(`.flag-icon-${saveList[1][Object.keys(saveList[1])[i]].replace(/\s/g, '')}{ background-image: url("${saveList[2][i].replace(/\s/g, '')}"); }`)
-    }
+        flagvar = ""
+        var name = saveList[0][i]
+	 if (saveList[2][saveList[1][name]]) {
+        addCSS(`.flag-icon-${saveList[1][name].replace(/\s/g, '')}{ background-image: url("${saveList[2][saveList[1][name]].replace(/\s/g, '')}"); }`)
+    }}
  
     alert("Imported!")
     createCountryTable('customContestants', customContestants);
