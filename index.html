@@ -836,6 +836,8 @@ importCustomContestantButton.addEventListener('click', async () => {
  
     alert("Imported!")
     createCountryTable('customContestants', customContestants);
+    document.querySelectorAll('#customContestants .country-checkbox').forEach(addCheckboxListeners);
+    updateAQCheckboxStatus();
 })
  
  
