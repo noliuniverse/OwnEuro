@@ -526,6 +526,8 @@ const oldContestants = [
 var customContestants = []
  
 var customContestantsFlag = {}
+
+
  
 const genres = ["Pop", "Disco", "Dark Pop", "Pop Ballad", "Power Ballad", "Folk", "Country", "Jazz", "Rock", "Punk", "Heavy Metal", "Techno", "Rap"];
 let genreLikeability = {};
@@ -929,10 +931,10 @@ generateButton.addEventListener('click', () => {
             return { name: checkbox.value, juryOdds: juryOdds, teleOdds: teleOdds, isAQ: isAQ, genre: genre };
         });
 
-    if (selectedCountries.length < 10 || selectedCountries.length > 50) {
+    /*if (selectedCountries.length < 10 || selectedCountries.length > 50) {
         alert('Please select between 11 and 50 countries.');
         return;
-    }
+    }*/
 
     const autoQualifiers = selectedCountries.filter(country => country.isAQ);
     if (autoQualifiers.length > 10) {
