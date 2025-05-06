@@ -487,6 +487,9 @@
                         </select>
                     </div>
                     <div class="mt-4">
+                        <button id="dontreset" class="btn btn-outline-success w-100">Keep Checkboxes? Status: false</button>
+                    </div>
+                    <div class="mt-4">
                         <p class="mt-2">Genre Likeability: 1 (Least Liked) to 5 (Most Liked)</p>
                         <small class="text-muted">Higher likeability (5) improves a country's odds, while lower likeability (1) worsens them.</small>
                         <h3 class="mt-4">Genre Likeability</h3>
@@ -629,6 +632,8 @@ const importCustomContestantButton = document.getElementById('import_custom');
 const exportCustomContestantButton = document.getElementById('export_custom');
 const randomizeJuryButton = document.getElementById('randomizeJuryButton');
 const randomizeTeleButton = document.getElementById('randomizeTeleButton');
+const dontreset = document.getElementById('dontreset');
+let dresetbool = false;
  
 let semiFinal1Results, semiFinal2Results, finalResults;
 let currentSemiFinal = 1;
@@ -702,7 +707,12 @@ randomizeTeleButton.addEventListener('click', () => {
         teleInput.value = teleOdds;
     });
 });
- 
+dontreset.addEventListener('click', () => {
+    dresetbool = !dresetbool;
+    console.log(!dresetbool + " to " + dresetbool)
+    const doNotRestButton = document.getElementById('dontreset');
+	doNotRestButton.textContent = `Keep Checkboxes? Status: ${dresetbool}`;
+})
 randomizeButton.addEventListener('click', () => {
     const minOdds = parseInt(document.getElementById('minOdds').value);
     const maxOdds = parseInt(document.getElementById('maxOdds').value);
@@ -2025,12 +2035,16 @@ dynamicVotingButton.addEventListener('click', () => {
  
 document.getElementById('resetButton').addEventListener('click', () => {
     // Reset checkboxes and AQ status
-    document.querySelectorAll('.country-checkbox, .aq-checkbox').forEach(checkbox => {
+    if (dresetbool == true) {
+    }
+    else {
+        document.querySelectorAll('.country-checkbox, .aq-checkbox').forEach(checkbox => {
         checkbox.checked = false;
         if (checkbox.classList.contains('aq-checkbox')) {
             checkbox.disabled = true;
         }
     });
+    }
 
     // Reset odds inputs
     document.querySelectorAll('.jury-odds-input, .tele-odds-input').forEach(input => {
