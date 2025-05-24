@@ -359,7 +359,10 @@
                     <button id="simulateSemiDrawButton" class="btn btn-primary mb-2" disabled>SIMULATE SEMI-FINALE DRAW</button>
                     <button id="simulateButton" class="btn btn-secondary mb-2" disabled>SIMULATE SEMI-FINALE</button>
                     <button id="dynamicVotingButton" class="btn btn-success mb-2" disabled>DYNAMIC FINALE VOTING</button>
-                    <button id="resetButton" class="btn btn-danger mb-2">RESET CURRENT SIMULATION</button>
+                    <button id="resetButton" class="btn btn-danger mb-2">RESET CURRENT SIMULATION</button> 
+                    <button id="saveScenarioButton" class="btn btn-success mb-2">SAVE SCENARIO</button>
+                    <button id="loadScenarioButton" class="btn btn-info mb-2">LOAD SCENARIO</button>
+                    <input type="file" id="loadScenarioInput" style="display: none;" accept=".json">
                 </div>
             </div>
         </div>
@@ -924,6 +927,245 @@ function populateSemiFinalTable(results) {
             <td>${data.juryOdds}</td>
             <td>${data.teleOdds}</td>
         `;
+    });
+}
+
+// Function to collect current scenario data from the UI
+function collectScenarioData() {
+    const scenario = {
+        // Version marker for the scenario file, can be useful for future compatibility
+        version: "1.2.0-scenario", // Example version
+        selectedCountriesData: [],
+        genreLikeability: {}, 
+        votingSystem: document.getElementById('votingSystem').value, 
+        revealTime: parseInt(document.getElementById('revealTime').value), 
+        minOdds: parseInt(document.getElementById('minOdds').value), 
+        maxOdds: parseInt(document.getElementById('maxOdds').value), 
+        maxOddsDifference: parseInt(document.getElementById('maxOddsDifference').value), 
+        // Data related to custom contestants
+        customContestants: [...window.customContestants], // Assuming 'customContestants' is a global array
+        customcountryCodeMap: {...window.customcountryCodeMap}, // Assuming 'customcountryCodeMap' is a global object
+        customContestantsFlag: {...window.customContestantsFlag} // Assuming 'customContestantsFlag' is a global object
+    };
+ 
+    // Collect data for each selected country
+    document.querySelectorAll('.country-checkbox:checked').forEach(checkbox => { 
+        const tdElement = checkbox.closest('td'); // Get the parent table cell <td>
+        if (!tdElement) {
+            console.warn('Could not find parent <td> for checkbox:', checkbox.value);
+            return; // Skip if structure is not as expected
+        }
+ 
+        // Find elements within this specific <td>
+        const containerDiv = tdElement.querySelector('.checkbox-container'); 
+        const oddsInputsDiv = tdElement.querySelector('.odds-inputs'); 
+        const genreSelect = tdElement.querySelector('.genre-select'); 
+ 
+        if (containerDiv && oddsInputsDiv && genreSelect) {
+            const juryOddsInput = oddsInputsDiv.querySelector('.jury-odds-input'); 
+            const teleOddsInput = oddsInputsDiv.querySelector('.tele-odds-input'); 
+            const aqCheckbox = containerDiv.querySelector('.aq-checkbox'); 
+ 
+            scenario.selectedCountriesData.push({
+                name: checkbox.value,
+                juryOdds: parseInt(juryOddsInput.value),
+                teleOdds: parseInt(teleOddsInput.value),
+                genre: genreSelect.value,
+                isAQ: aqCheckbox.checked
+            });
+        } else {
+            console.warn('Could not find all required elements for country:', checkbox.value, 'within its <td>');
+        }
+    });
+ 
+    // Collect genre likeability settings
+    genres.forEach(genre => { // 'genres' is a global array in your script
+        const inputElement = document.querySelector(`.genre-likeability[data-genre="${genre}"]`); 
+        if (inputElement) {
+            scenario.genreLikeability[genre] = parseInt(inputElement.value);
+        } else {
+             scenario.genreLikeability[genre] = 3; // Default value if element somehow not found
+        }
+    });
+    return scenario;
+}
+ 
+// Function to apply loaded scenario data to the UI
+function applyScenarioData(scenario) {
+    // 1. Gently reset current selections (without triggering full reset logic)
+    document.querySelectorAll('.country-checkbox, .aq-checkbox').forEach(cb => cb.checked = false); 
+    document.querySelectorAll('.jury-odds-input, .tele-odds-input').forEach(input => input.value = 100); 
+    document.querySelectorAll('.genre-select').forEach(select => select.selectedIndex = 0); 
+ 
+    // 2. Apply custom contestants data if present in the scefario
+    // This assumes 'createCountryTable' and 'addCSS' functions are globally available from your original script
+    if (scenario.customContestants && scenario.customcountryCodeMap && scenario.customContestantsFlag && typeof createCountryTable === 'function') {
+        window.customContestants = [...scenario.customContestants]; 
+        window.customcountryCodeMap = {...scenario.customcountryCodeMap}; 
+        window.customContestantsFlag = {...scenario.customContestantsFlag};
+ 
+        
+ 
+        if (typeof addCSS === 'function') {
+            window.customContestants.forEach(name => {
+                const code = window.customcountryCodeMap[name];
+                // Find the flag URL for this custom country.
+                // This assumes customContestantsFlag stores URLs in the same order as customContestants names.
+                const countryIndex = window.customContestants.indexOf(name);
+                if (code && window.customContestantsFlag[code]) {
+                     addCSS(`.flag-icon-${code}{ background-image: url("${window.customContestantsFlag[code]}"); }`); 
+                }
+            });
+        }
+        createCountryTable('customContestants', window.customContestants); 
+        // Re-attach listeners for newly created custom checkboxes. 'addCheckboxListeners' is from your script
+        if (typeof addCheckboxListeners === 'function') {
+            document.querySelectorAll('#customContestants .country-checkbox').forEach(addCheckboxListeners); 
+        }
+    }
+ 
+    // 3. Apply selected countries' specific data
+    scenario.selectedCountriesData.forEach(countryData => {
+        // Find the checkbox for the country. This query might need to be more specific if country names can appear in multiple tables.
+        const checkbox = document.querySelector(`.country-checkbox[value="${countryData.name}"]`);
+        if (checkbox) {
+            checkbox.checked = true;
+            const td = checkbox.closest('td'); // Get parent <td>
+            if (td) {
+                const juryInput = td.querySelector('.jury-odds-input');
+                if (juryInput) juryInput.value = countryData.juryOdds;
+ 
+                const teleInput = td.querySelector('.tele-odds-input');
+                if (teleInput) teleInput.value = countryData.teleOdds;
+ 
+                const genreSel = td.querySelector('.genre-select');
+                if (genreSel) genreSel.value = countryData.genre;
+ 
+                const aqCb = td.querySelector('.checkbox-container .aq-checkbox'); // Check within .checkbox-container
+                if (aqCb) aqCb.checked = countryData.isAQ;
+            }
+        } else {
+            console.warn('Could not find checkbox for country:', countryData.name, 'when applying scenario.');
+        }
+    });
+ 
+    // 4. Apply genre likeability
+    // 'genreLikeability' (the object) and 'genres' (the array) are global in your script
+    if (scenario.genreLikeability && typeof genreLikeability === 'object' && genreLikeability !== null) {
+        genres.forEach(genre => { 
+            const inputElement = document.querySelector(`.genre-likeability[data-genre="${genre}"]`); 
+            if (inputElement && scenario.genreLikeability[genre] !== undefined) {
+                inputElement.value = scenario.genreLikeability[genre];
+                genreLikeability[genre] = scenario.genreLikeability[genre]; // Update the JS variable as well
+            }
+        });
+    }
+ 
+    // 5. Apply global settings
+    const votingSystemEl = document.getElementById('votingSystem'); 
+    if (votingSystemEl) votingSystemEl.value = scenario.votingSystem || 'current'; // Default to 'current' if not in scenario
+ 
+    const revealTimeEl = document.getElementById('revealTime'); 
+    if (revealTimeEl) revealTimeEl.value = scenario.revealTime || 10; // Default to 10
+ 
+    const minOddsEl = document.getElementById('minOdds'); 
+    if (minOddsEl) minOddsEl.value = scenario.minOdds || 1; // Default to 1
+ 
+    const maxOddsEl = document.getElementById('maxOdds'); 
+    if (maxOddsEl) maxOddsEl.value = scenario.maxOdds || 500; // Default to 500
+ 
+    const maxOddsDiffEl = document.getElementById('maxOddsDifference'); 
+    if (maxOddsDiffEl) maxOddsDiffEl.value = scenario.maxOddsDifference || 75; // Default to 75
+ 
+    // 6. Crucial: Refresh UI states, especially AQ checkbox statuses
+    // 'updateAQCheckboxStatus' is a global function in your script
+    if (typeof updateAQCheckboxStatus === 'function') {
+        updateAQCheckboxStatus(); 
+    } else {
+        console.error('updateAQCheckboxStatus function is not defined. AQ states might be incorrect.');
+    }
+}
+ 
+// Event Listener for the "SAVE SCENARIO" button
+const saveScenarioButtonEl = document.getElementById('saveScenarioButton');
+if (saveScenarioButtonEl) {
+    saveScenarioButtonEl.addEventListener('click', () => {
+        const scenarioData = collectScenarioData();
+        const scenarioJSON = JSON.stringify(scenarioData, null, 2);
+ 
+        // Suggest a default filename including the current date
+        const today = new Date();
+        const dateString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        const defaultFileName = `eurovision_scenario_${dateString}`;
+ 
+        // Ask the user for a filename, providing the default one
+        let userFileName = prompt("Enter a filename for your scenario (e.g., MyFavoriteESC)", defaultFileName);
+ 
+        // If the user clicks "Cancel" or leaves it empty, use the default name
+        if (userFileName === null || userFileName.trim() === "") {
+            userFileName = defaultFileName;
+        }
+ 
+        // Ensure the filename ends with .json
+        if (!userFileName.toLowerCase().endsWith('.json')) {
+            userFileName += '.json';
+        }
+ 
+        const a = document.createElement('a');
+        a.href = `data:text/json;charset=utf-8,${encodeURIComponent(scenarioJSON)}`;
+        a.download = userFileName; // Use the user-provided or default filename
+ 
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+ 
+        alert(`Scenario has been saved as ${userFileName}!`); // Inform the user about the actual filename
+    });
+}
+ 
+// Event Listener for the "LOAD SCENARIO" button (which triggers the hidden file input)
+const loadScenarioButtonEl = document.getElementById('loadScenarioButton');
+if (loadScenarioButtonEl) {
+    loadScenarioButtonEl.addEventListener('click', () => {
+        const loadScenarioInputEl = document.getElementById('loadScenarioInput'); 
+        if (loadScenarioInputEl) {
+            loadScenarioInputEl.click(); // Programmatically click the hidden file input
+        }
+    });
+}
+ 
+// Event Listener for the hidden file input (when a file is selected)
+const loadScenarioInputEl = document.getElementById('loadScenarioInput'); 
+if (loadScenarioInputEl) {
+    loadScenarioInputEl.addEventListener('change', (event) => {
+        const file = event.target.files[0]; // Get the selected file
+        if (!file) {
+            return; // No file selected
+        }
+ 
+        const reader = new FileReader(); // Create a FileReader to read the file content
+        reader.onload = (e) => { // This function is called when the file is successfully read
+            try {
+                const scenario = JSON.parse(e.target.result); // Parse the file content as JSON
+                // Basic validation: check if the loaded object has a 'version' property
+                if (!scenario || typeof scenario.version === 'undefined') { 
+                    alert('This does not look like a valid scenario file (missing version property or invalid JSON).');
+                    return;
+                }
+                applyScenarioData(scenario); // Apply the loaded data to the UI
+                alert('Scenario has been loaded!');
+            } catch (error) {
+                console.error('Error loading or parsing scenario file:', error);
+                alert(`Could not load scenario. Error: ${error.message}`);
+            }
+            // Reset the file input's value. This allows loading the same file again if the user wishes to.
+            event.target.value = null; 
+        };
+        reader.onerror = (e) => {
+            console.error('Error reading file:', e);
+            alert('Error reading the selected file.');
+        };
+        reader.readAsText(file); // Start reading the file as plain text
     });
 }
  
