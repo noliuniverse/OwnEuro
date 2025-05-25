@@ -570,7 +570,7 @@ function getCountryCode(countryName) {
         "Hungary": "hu", "Monaco": "mc", "Morocco": "ma", "Russia": "ru", "Slovakia": "sk",
         "Turkey": "tr"
     };
-    return (countryCodeMap[countryName] || customcountryCodeMap[countryName]) || "unknown";
+    return (customcountryCodeMap[countryName]) || countryCodeMap[countryName] || "unknown";
 }
  
 function createCountryTable(containerId, countries) {
@@ -585,9 +585,9 @@ function createCountryTable(containerId, countries) {
             html += `
                 <td>
                     <div class="checkbox-container">
-                        <input class="form-check-input country-checkbox" type="checkbox" value="${countries[j]}">
+                        <input class="form-check-input country-checkbox" type="checkbox" value="${getCountryCode(countries[j])}">
                         <span class="aq-label">AQ</span>
-                        <input class="aq-checkbox" type="checkbox" value="${countries[j]}" title="Auto-qualifier">
+                        <input class="aq-checkbox" type="checkbox" value="${getCountryCode(countries[j])}" title="Auto-qualifier">
                         <span class="country-name">
                             ${countries[j]}
                             <span class="flag-icon flag-icon-${getCountryCode(countries[j])} ml-2"></span>
@@ -930,6 +930,10 @@ function populateSemiFinalTable(results) {
     });
 }
 
+function getObjectKey(obj, value) {
+  return Object.keys(obj).find(key => obj[key] === value);
+}
+
 // Function to collect current scenario data from the UI
 function collectScenarioData() {
     const scenario = {
@@ -967,11 +971,12 @@ function collectScenarioData() {
             const aqCheckbox = containerDiv.querySelector('.aq-checkbox'); 
  
             scenario.selectedCountriesData.push({
-                name: checkbox.value,
+                name: getObjectKey(customcountryCodeMap, checkbox.value),
                 juryOdds: parseInt(juryOddsInput.value),
                 teleOdds: parseInt(teleOddsInput.value),
                 genre: genreSelect.value,
-                isAQ: aqCheckbox.checked
+                isAQ: aqCheckbox.checked,
+                code: checkbox.value
             });
         } else {
             console.warn('Could not find all required elements for country:', checkbox.value, 'within its <td>');
@@ -1010,11 +1015,10 @@ function applyScenarioData(scenario) {
             window.customContestants.forEach(name => {
                 const code = window.customcountryCodeMap[name];
                 // Find the flag URL for this custom country.
-                // This assumes customContestantsFlag stores URLs in the same order as customContestants names.
-                const countryIndex = window.customContestants.indexOf(name);
                 if (code && window.customContestantsFlag[code]) {
                      addCSS(`.flag-icon-${code}{ background-image: url("${window.customContestantsFlag[code]}"); }`); 
                 }
+                console.log(name + code)
             });
         }
         createCountryTable('customContestants', window.customContestants); 
@@ -1027,7 +1031,8 @@ function applyScenarioData(scenario) {
     // 3. Apply selected countries' specific data
     scenario.selectedCountriesData.forEach(countryData => {
         // Find the checkbox for the country. This query might need to be more specific if country names can appear in multiple tables.
-        const checkbox = document.querySelector(`.country-checkbox[value="${countryData.name}"]`);
+        console.log(countryData.code)
+        const checkbox = document.querySelector(`.country-checkbox[value="${countryData.code}"]`);
         if (checkbox) {
             checkbox.checked = true;
             const td = checkbox.closest('td'); // Get parent <td>
@@ -1180,7 +1185,7 @@ generateButton.addEventListener('click', () => {
             const teleOdds = parseInt(teleOddsInput.value) || 100;
             const isAQ = containerDiv.querySelector('.aq-checkbox').checked;
             const genre = genreSelect.value;
-            return { name: checkbox.value, juryOdds: juryOdds, teleOdds: teleOdds, isAQ: isAQ, genre: genre };
+            return { name: getObjectKey(customcountryCodeMap, checkbox.value), juryOdds: juryOdds, teleOdds: teleOdds, isAQ: isAQ, genre: genre, code: checkbox.value };
         });
 
     /*if (selectedCountries.length < 10 || selectedCountries.length > 50) {
