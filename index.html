@@ -556,8 +556,7 @@ document.getElementById('randomizeGenreLikeabilityButton').addEventListener('cli
  
 var customcountryCodeMap = {}
  
-function getCountryCode(countryName) {
-    const countryCodeMap = {
+const countryCodeMap = {
         "Albania": "al", "Armenia": "am", "Australia": "au", "Austria": "at", "Azerbaijan": "az",
         "Belgium": "be", "Bulgaria": "bg", "Croatia": "hr", "Cyprus": "cy", "Czechia": "cz",
         "Denmark": "dk", "Estonia": "ee", "Finland": "fi", "France": "fr", "Georgia": "ge",
@@ -570,6 +569,9 @@ function getCountryCode(countryName) {
         "Hungary": "hu", "Monaco": "mc", "Morocco": "ma", "Russia": "ru", "Slovakia": "sk",
         "Turkey": "tr"
     };
+
+function getCountryCode(countryName) {
+    
     return (customcountryCodeMap[countryName]) || countryCodeMap[countryName] || "unknown";
 }
  
@@ -971,7 +973,7 @@ function collectScenarioData() {
             const aqCheckbox = containerDiv.querySelector('.aq-checkbox'); 
  
             scenario.selectedCountriesData.push({
-                name: getObjectKey(customcountryCodeMap, checkbox.value),
+                name: getObjectKey(customcountryCodeMap, checkbox.value) || getObjectKey(countryCodeMap, checkbox.value),
                 juryOdds: parseInt(juryOddsInput.value),
                 teleOdds: parseInt(teleOddsInput.value),
                 genre: genreSelect.value,
@@ -1185,7 +1187,7 @@ generateButton.addEventListener('click', () => {
             const teleOdds = parseInt(teleOddsInput.value) || 100;
             const isAQ = containerDiv.querySelector('.aq-checkbox').checked;
             const genre = genreSelect.value;
-            return { name: getObjectKey(customcountryCodeMap, checkbox.value), juryOdds: juryOdds, teleOdds: teleOdds, isAQ: isAQ, genre: genre, code: checkbox.value };
+            return { name: getObjectKey(customcountryCodeMap, checkbox.value) || getObjectKey(countryCodeMap, checkbox.value), juryOdds: juryOdds, teleOdds: teleOdds, isAQ: isAQ, genre: genre, code: checkbox.value };
         });
 
     /*if (selectedCountries.length < 10 || selectedCountries.length > 50) {
@@ -1409,6 +1411,8 @@ function selectVotingCountries(weightedCountries) {
             selectedCountries.push(selectedCountry);
             weightedCountries = weightedCountries.filter(c => c.country !== selectedCountry);
         } else {
+            console.log(weightedCountries)
+            console.log(Math.floor(Math.random() * weightedCountries.length))
             const remainingCountry = weightedCountries[Math.floor(Math.random() * weightedCountries.length)].country;
             selectedCountries.push(remainingCountry);
             weightedCountries = weightedCountries.filter(c => c.country !== remainingCountry);
